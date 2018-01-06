@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">MOIM磨唧</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="phone">Phone</string>
+    <string name="email">Email</string>
+    <string name="nickname">Nickname</string>
+    <string name="birth">Birthday</string>
+    <string name="gender">Gender</string>
+    <string name="location">Location</string>
+    <string name="info">Information</string>
+    <string name="male">Y</string>
+    <string name="female">X</string>
+
+    <string name="chat">Chat</string>
+    <string name="contacts">Contacts</string>
+    <string name="discover">Discover</string>
+    <string name="me">Me</string>
+
+    <string name="logging_in">Logging in...</string>
+    <string name="ERROR_INTERNET">Something wrong with the Internet.</string>
+
+    <string name="PERSON_SETTING">Setting</string>
+
+    <string name="set_remark">Set Remark</string>
+    <string name="messages">Messages</string>
+    <string name="delete">Delete</string>
+    <string name="copy">Copy</string>
+
+    <string name="login">Sign in</string>
+    <string name="register">Sign up</string>
+    <string name="logout">Sign out</string>
+
+    <string name="forget_password">Forget password?</string>
+    <string name="newhere">New here?Sign up</string>
+
+    <string name="again">Again</string>
+
+    <string name="circle">Moim Circle</string>
+
+</resources>

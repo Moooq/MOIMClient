@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/msg_list_view"
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:divider="#0000"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#fff">
+        <ImageView
+            android:layout_margin="5dp"
+            android:id="@+id/iv_voice"
+            android:layout_gravity="center_vertical"
+            android:clickable="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/voice"/>
+        <EditText
+            android:id="@+id/input_text"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:maxHeight="100dp"
+            android:layout_weight="1"
+            android:maxLines="2"/>
+        <ImageView
+            android:layout_margin="5dp"
+            android:id="@+id/iv_expression"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/expression"
+            android:layout_gravity="center_vertical"/>
+        <Button
+            android:id="@+id/send_btn"
+            android:layout_height="40dp"
+            android:layout_width="60dp"
+            android:background="@color/yellow"
+            android:textAllCaps="false"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"
+            android:text="Send" />
+        <ImageView
+            android:layout_margin="5dp"
+            android:id="@+id/iv_other"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/other"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+</LinearLayout>
