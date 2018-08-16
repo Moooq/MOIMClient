@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400px"
+    android:layout_height="600px">
+
+    <TextView
+        android:id="@+id/tv_match_time"
+        android:layout_width="400px"
+        android:layout_height="400px"
+        android:textStyle="bold"
+        android:text="60s"
+        android:gravity="center"
+        android:background="@color/white"
+        android:textSize="100px"/>
+    <Button
+        android:id="@+id/btn_dialog_ok"
+        android:background="@drawable/btn"
+        android:textColor="@color/white"
+        android:textAllCaps="false"
+        android:layout_marginTop="40px"
+        android:textStyle="bold"
+        android:layout_below="@id/tv_match_time"
+        android:layout_width="250px"
+        android:layout_centerHorizontal="true"
+        android:layout_height="80px"
+        android:text="@string/cancel" />
+
+
+</RelativeLayout>

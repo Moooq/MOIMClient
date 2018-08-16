@@ -48,7 +48,7 @@
             android:textAllCaps="false"
             android:layout_gravity="center_vertical"
             android:visibility="gone"
-            android:text="Send" />
+            android:text="@string/send" />
         <ImageView
             android:layout_margin="5dp"
             android:id="@+id/iv_other"

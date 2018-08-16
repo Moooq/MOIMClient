@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -16,30 +17,38 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.jammy.mchsclient.activity.AddContactsActivity;
 import com.jammy.mchsclient.activity.InfoActivity;
 import com.jammy.mchsclient.MyApplication;
 import com.jammy.mchsclient.R;
+import com.jammy.mchsclient.activity.SearchActivity;
 import com.jammy.mchsclient.model.Friend;
+import com.jammy.mchsclient.model.Msg;
 import com.jammy.mchsclient.model.ReturnFriends;
 import com.jammy.mchsclient.url.API;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Response;
 
-import static android.content.ContentValues.TAG;
 import static com.jammy.mchsclient.MyApplication.friends;
+import static com.jammy.mchsclient.MyApplication.userOnLine;
 
 /**
  * Created by moqiandemac on 2017/7/10.
@@ -47,13 +56,15 @@ import static com.jammy.mchsclient.MyApplication.friends;
 
 public class ContactsFragment extends Fragment {
 
+    public static final String TAG = "ContactsFragment";
     ImageView ivAdd;
-    EditText etSearch;
-    ImageView ivEtDelete;
+    ImageView ivSearch;
     ListView lvContacts;
     ReturnFriends returnFriends;
     int fnum = 0;
     ArrayList<String> list = new ArrayList<>();
+    ArrayList<Friend> friendlist = new ArrayList<>();
+    public static Handler handler = null;
 
     @Nullable
     @Override
@@ -61,47 +72,58 @@ public class ContactsFragment extends Fragment {
         View ContactsView = inflater.inflate(R.layout.fragment_contacts, container, false);
         ivAdd = (ImageView)ContactsView.findViewById(R.id.iv_add_friend);
         lvContacts = (ListView) ContactsView.findViewById(R.id.lv_contacts);
-        etSearch = (EditText)ContactsView.findViewById(R.id.et_contacts_search);
-        etSearch.clearFocus();
-        ivEtDelete = (ImageView)ContactsView.findViewById(R.id.iv_search_delete);
-        init();
+        ivSearch = (ImageView)ContactsView.findViewById(R.id.iv_search);
         getNetData();
+        init();
         return ContactsView;
     }
     private void init(){
-        etSearch.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-        etSearch.setInputType(EditorInfo.TYPE_CLASS_TEXT);
-        etSearch.addTextChangedListener(new EditChangedListener());
-        etSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            public boolean onEditorAction(TextView v, int actionId,KeyEvent event)  {
-                if (actionId==EditorInfo.IME_ACTION_SEND ||(event!=null&&event.getKeyCode()== KeyEvent.KEYCODE_ENTER))
-                {
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0) ;
-                    etSearch.clearFocus();
-                    etSearch.setText("");
-                    //do something;
-                    return true;
-                }
-                return false;
+        ivSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.clear();
+                bundle.putSerializable("friendlist", friendlist);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+        ivAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddContactsActivity.class);
+                startActivity(intent);
             }
         });
 
-        ivEtDelete.setOnClickListener(new View.OnClickListener() {
+        handler = new Handler(){
+            /**
+             * Subclasses must implement this to receive messages.
+             *
+             * @param msg
+             */
             @Override
-            public void onClick(View v) {
-                etSearch.setText("");
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if(msg.what==0){
+                    Msg newAp = (Msg) msg.obj;
+                }
             }
-        });
+        };
+
     }
 
     private void getNetData() {
+        Log.i(TAG, "useronline:"+userOnLine.getUsername());
         OkGo.post(API.RECEIVE_FRIENDS_API)
-                .params("userInfo.username", MyApplication.userOnLine.getUsername())
+                .params("userInfo.username", userOnLine.getUsername())
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(String s, Call call, Response response) {
+                        Log.i("ContactsFragment", "getNetdata:success");
                         Gson gson = new Gson();
+                        Log.i("ContactsFragment", "friends:"+gson);
                         returnFriends = gson.fromJson(s, ReturnFriends.class);
                         if (returnFriends.getCode() == 200 && returnFriends.getMsg().equals("SUCCESS")) {
                             fnum = returnFriends.getData().length;
@@ -116,12 +138,12 @@ public class ContactsFragment extends Fragment {
                                     Intent intent = new Intent(getActivity(), InfoActivity.class);
                                     list.clear();
                                     list.add(returnFriends.getData()[position].getUsername());
-                                    Log.i(TAG, "onItemClick: "+returnFriends.getData()[position].getUsername());
-                                    list.add(returnFriends.getData()[position].getEmail());
-                                    list.add(returnFriends.getData()[position].getPhone());
-                                    list.add(returnFriends.getData()[position].getHead());
-                                    list.add(returnFriends.getData()[position].getNickname());
-                                    list.add(returnFriends.getData()[position].getGender()+"");
+                                    Log.i("ContactsFragment", "onItemClick: "+returnFriends.getData()[position].getUsername());
+                                    list.add(returnFriends.getData()[position].getFriendinfo().getEmail());
+                                    list.add(returnFriends.getData()[position].getFriendinfo().getPhone());
+                                    list.add(returnFriends.getData()[position].getFriendinfo().getHead());
+                                    list.add(returnFriends.getData()[position].getFriendinfo().getNickname());
+                                    list.add(returnFriends.getData()[position].getFriendinfo().getGender()+"");
                                     list.add(returnFriends.getData()[position].getRemark());
                                     Bundle bundle = new Bundle();
                                     bundle.putSerializable("friend", list);
@@ -169,40 +191,22 @@ public class ContactsFragment extends Fragment {
             final TextView tvFriendName = (TextView) view.findViewById(R.id.tv_contacts_friendname);
             final ImageView ivFriendHead = (ImageView) view.findViewById(R.id.iv_contacts_friendhead);
             final Friend friendItem = data[arg0];
-            Log.i("body", "" + friendItem.getUsername());
+            Log.i("ContactsFragment", "" + friendItem.getUsername());
+            friendlist.add(friendItem);
             if (!friendItem.getRemark().equals(" ")) {
                 tvFriendName.setText(friendItem.getRemark());
             } else {
-                tvFriendName.setText(friendItem.getNickname());
+                tvFriendName.setText(friendItem.getFriendinfo().getNickname());
             }
+            Picasso.with(getContext())
+                    .load(API.HEAD_PATH+friendItem.getUsername()+"_Head.png")
+                    .fit()
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    .error(R.drawable.head)
+                    .into(ivFriendHead);
             return view;
         }
     }
-
-    class EditChangedListener implements TextWatcher {
-        private CharSequence temp;//监听前的文本
-        private int editStart;//光标开始位置
-        private int editEnd;//光标结束位置
-        private final int charMaxNum = 10;
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            temp = s;
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (s.length()>0){
-                ivEtDelete.setVisibility(View.VISIBLE);
-            }else{
-                ivEtDelete.setVisibility(View.GONE);
-            }
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-        }
-    };
 
 }

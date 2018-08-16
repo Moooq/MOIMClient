@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,6 +29,9 @@ import com.jammy.mchsclient.model.ReturnUnRead;
 import com.jammy.mchsclient.url.API;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,24 +39,30 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Response;
 
-import static android.content.ContentValues.TAG;
 import static com.jammy.mchsclient.MyApplication.activityMap;
+import static com.jammy.mchsclient.MyApplication.userOnLine;
 
 /**
  * Created by moqiandemac on 2017/7/10.
  */
 
 public class ChatFragment extends Fragment {
+
+    public static final String TAG = "ChatFragment";
+
     int CHATLOG = 0;
     ListView lvChat;
+
     DBManager dbManager = new DBManager();
     List<Msg> chatList = new ArrayList<Msg>();
     List<Msg> msgList = new ArrayList<Msg>();
     public static Handler handler = null;
 
     private MyBaseAdapter adapter;
+    private String name1=null;
     ReturnUnRead returnUnRead;
     int getunread = 0;
+    String friendname;
 
     @Nullable
     @Override
@@ -74,7 +84,7 @@ public class ChatFragment extends Fragment {
                 dbManager.insertData(newMsg, getContext());
                 if (chatList != null) {
                     for (int j = 0; j < chatList.size(); j++) {
-                        if (chatList.get(j).getFriend().equals(newMsg.getFriend())) {
+                        if (chatList.get(j).getSender().equals(newMsg.getSender())||chatList.get(j).getReceiver().equals(newMsg.getSender())) {
                             newN = chatList.get(j).getType();
                             if (newN < 0) {
                                 newN = 0;
@@ -109,11 +119,11 @@ public class ChatFragment extends Fragment {
             List<Msg> unreadList = new ArrayList<Msg>();
             unreadList = getUnreadList(listToMsgs(msgList));
             getunread = unreadList.size();
-            Log.i("dbdbdb", "getunread: " + getunread);
+            Log.i(TAG, "getDBDatas:getunread: " + getunread);
             adapter = new MyBaseAdapter(listToMsgs(unreadList));
             lvChat.setAdapter(adapter);
         } else {
-            Toast.makeText(getContext(), "NO MESSAGE", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "NO MESSAGE", Toast.LENGTH_SHORT).show();
         }
         getNetDatas();
     }
@@ -136,11 +146,30 @@ public class ChatFragment extends Fragment {
 
     private List<Msg> getUnreadList(Msg[] ms) {
         List<Msg> mes = new ArrayList<Msg>();
-        Log.i("123", "length:" + ms.length);
+        Log.i(TAG, "getUnreadList:length:" + ms.length);
         if (ms.length > 1) {
             for (int i = 0; i < ms.length - 1; i++) {
-                if (!ms[i].getFriend().equals(ms[i + 1].getFriend())) {
-                    mes.add(ms[i]);
+                if(ms[i].getType()==1){
+                    if(ms[i+1].getType()==1){
+                        if (!ms[i].getSender().equals(ms[i + 1].getSender())) {
+                            mes.add(ms[i]);
+                        }
+                    }else if(ms[i+1].getType()==0){
+                        if (!ms[i].getSender().equals(ms[i + 1].getReceiver())) {
+                            mes.add(ms[i]);
+                        }
+                    }
+                }
+                if(ms[i].getType()==0){
+                    if(ms[i+1].getType()==1){
+                        if (!ms[i].getReceiver().equals(ms[i + 1].getSender())) {
+                            mes.add(ms[i]);
+                        }
+                    }else if(ms[i+1].getType()==0){
+                        if (!ms[i].getReceiver().equals(ms[i + 1].getReceiver())) {
+                            mes.add(ms[i]);
+                        }
+                    }
                 }
             }
         }
@@ -159,7 +188,7 @@ public class ChatFragment extends Fragment {
                         returnUnRead = gson.fromJson(s, ReturnUnRead.class);
                         if (returnUnRead.getCode() == 200 && returnUnRead.getMsg().equals("SUCCESS") && returnUnRead.getData().length > 0) {
                             dbManager.insertDatas(returnUnRead.getData(), getContext());
-                            Log.i("type", "onSuccess: " + returnUnRead.getData().length + ":" + MsgsToList(returnUnRead.getData()).size());
+                            Log.i(TAG, "getNetDatas: " + returnUnRead.getData().length + ":" + MsgsToList(returnUnRead.getData()).size());
                             new GetUnReadMessages().execute(MsgsToList(returnUnRead.getData()));
                         } else {
                         }
@@ -198,14 +227,27 @@ public class ChatFragment extends Fragment {
                     .inflate(R.layout.item_chat, null);
             final TextView tvChaterName = (TextView) view.findViewById(R.id.tv_chater_name);
             final TextView tvChatMsg = (TextView) view.findViewById(R.id.tv_chat_msg);
+            final ImageView ivChaterHead = (ImageView)view.findViewById(R.id.iv_chater_head);
             final TextView tvChatTime = (TextView) view.findViewById(R.id.tv_chat_time);
             final LinearLayout layoutItemChat = (LinearLayout)view.findViewById(R.id.layout_item_chat);
             layoutItemChat.getBackground().setAlpha(230);
             final TextView tvUnreadNum = (TextView) view.findViewById(R.id.tv_unread_num);
-            tvChaterName.setText(data[getunread - 1 - arg0].getFriend());
+            if(data[getunread-1-arg0].getSender().equals(userOnLine.getUsername())){
+                friendname=new String(data[getunread-1-arg0].getReceiver());
+            }else{
+                friendname=new String(data[getunread-1-arg0].getSender());
+            }
+            Picasso.with(getContext())
+                    .load(API.HEAD_PATH+friendname+"_Head.png")
+                    .fit()
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    .error(R.drawable.head)
+                    .into(ivChaterHead);
+            tvChaterName.setText(friendname);
             tvChatMsg.setText(data[getunread - 1 - arg0].getMessagecontent() + "");
             tvChatTime.setText(data[getunread - 1 - arg0].getTime());
-            Log.i("123", "getView: " + data[getunread - 1 - arg0].getType() + "");
+//            Log.i("123", "getView: " + data[getunread - 1 - arg0].getType() + "");
             if (data[getunread - 1 - arg0].getType() <= 0) {
                 tvUnreadNum.setVisibility(View.GONE);
             } else {
@@ -217,7 +259,7 @@ public class ChatFragment extends Fragment {
                 public void onClick(View v) {
                     Intent intent = new Intent(getActivity(), ChatActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("chat", data[getunread - 1 - arg0].getFriend());
+                    bundle.putSerializable("chat",friendname);
                     intent.putExtras(bundle);
                     startActivityForResult(intent, CHATLOG);
                 }
@@ -235,16 +277,15 @@ public class ChatFragment extends Fragment {
 
         @Override
         protected Integer doInBackground(List<Msg>... params) {
-            Log.i("asynctask", "start");
-
+            Log.i(TAG, "asynctask:start");
             Msg un = new Msg();
             Log.i("type", "" + params);
             if (params[0].size() == 1) {
                 un = params[0].get(0);
-                Log.i("chatlist", "un:" + un.getFriend() + ":" + un.getMessagecontent());
-                int n2 = 0;
+//                Log.i("chatlist", "un:" + un.getFriend() + ":" + un.getMessagecontent());
+//                int n2 = 0;
                 for (int j = 0; j < chatList.size(); j++) {
-                    if (un.getFriend().equals(chatList.get(j).getFriend())) {
+                    if (un.getSender().equals(chatList.get(j).getSender())||un.getSender().equals(chatList.get(j).getReceiver())) {
                         chatList.remove(j);
                     }
                 }
@@ -254,8 +295,14 @@ public class ChatFragment extends Fragment {
                 for (int i = 0; i < params[0].size() - 1; i++) {
                     int n = 0;
                     un = params[0].get(i);
+                    if (!un.getSender().equals(userOnLine.getUsername())){
+                        friendname=un.getReceiver();
+                    }else{
+                        friendname=un.getSender();
+                    }
                     for (int j = 0; j < chatList.size(); j++) {
-                        if (params[0].get(i).getFriend().equals(chatList.get(j).getFriend())) {
+
+                        if (friendname.equals(chatList.get(j).getSender())||friendname.equals(chatList.get(j).getReceiver())) {
                             n = chatList.get(j).getType();
                             if (n < 0) {
                                 n = 0;
@@ -263,17 +310,22 @@ public class ChatFragment extends Fragment {
                             chatList.remove(j);
                         }
                     }
-                    Log.i("type", "before:" + un.getType());
+                    Log.i(TAG, "before:" + un.getType());
                     un.setType(n + 1);
-                    Log.i("type", "after:" + un.getType());
+                    Log.i(TAG, "after:" + un.getType());
                     chatList.add(un);
                 }
-                Log.i("type", "doInBackground: ");
+                Log.i(TAG, "doInBackground: ");
                 un = params[0].get(params[0].size() - 1);
-                Log.i("chatlist", "un:" + un.getFriend() + ":" + un.getMessagecontent());
+//                Log.i("chatlist", "un:" + un.getFriend() + ":" + un.getMessagecontent());
                 int n2 = 0;
+                if (!un.getSender().equals(userOnLine.getUsername())){
+                    friendname=un.getReceiver();
+                }else{
+                    friendname=un.getSender();
+                }
                 for (int j = 0; j < chatList.size(); j++) {
-                    if (un.getFriend().equals(chatList.get(j).getFriend())) {
+                    if (friendname.equals(chatList.get(j).getSender())||friendname.equals(chatList.get(j).getReceiver())) {
                         n2 = chatList.get(j).getType();
                         if (n2 < 0) {
                             n2 = 0;
@@ -284,7 +336,7 @@ public class ChatFragment extends Fragment {
                 un.setType(n2 + 1);
                 chatList.add(un);
             }
-            Log.i("asynctask", "end:0");
+            Log.i(TAG, "asynctask:end:0");
             return 0;
         }
 
@@ -292,7 +344,7 @@ public class ChatFragment extends Fragment {
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
             if (integer == 0) {
-                Log.i("asynctask", "start:0");
+                Log.i(TAG, "asynctask:start:0");
                 List<Msg> unreadList = new ArrayList<Msg>();
                 unreadList = chatList;
                 getunread = unreadList.size();

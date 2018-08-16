@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:id="@+id/layout_item_sfriend"
+    android:background="@color/white"
+    >
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:src="@drawable/head"
+        android:id="@+id/iv_search_friendhead"/>
+    <RelativeLayout
+        android:layout_marginLeft="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="55dp">
+        <TextView
+            android:id="@+id/tv_search_friendname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:textSize="20dp"
+            android:layout_gravity="center_vertical"
+            android:text="martin"/>
+        <TextView
+            android:id="@+id/tv_search_remark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/tv_search_friendname"
+            android:textSize="20dp"
+            android:layout_gravity="center_vertical"
+            android:text="(martin)"/>
+        <TextView
+            android:id="@+id/tv_search_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:textSize="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center_vertical"
+            android:text="ID:"/>
+        <TextView
+            android:id="@+id/tv_search_friendusername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="5dp"
+            android:textSize="15dp"
+            android:layout_toRightOf="@id/tv_search_id"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center_vertical"
+            android:text="martin"/>
+    </RelativeLayout>
+
+
+</LinearLayout>

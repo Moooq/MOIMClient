@@ -49,7 +49,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 Intent intent = new Intent(WelcomeActivity.this, RegisterActivity.class);
                 startActivity(intent);
                 //结束当前的 Activity
-                finish();
             }
         });
     }

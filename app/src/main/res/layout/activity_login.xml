@@ -65,6 +65,7 @@
                 android:layout_marginLeft="20dp"
                 android:singleLine="true"
                 android:maxEms="20"
+                android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 android:layout_toRightOf="@id/iv_login_user"
                 android:hint="@string/username"
                 android:textColor="@color/white"

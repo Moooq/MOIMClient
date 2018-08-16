@@ -23,7 +23,7 @@ import com.lzy.okgo.callback.StringCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Response;
@@ -31,7 +31,7 @@ import okhttp3.Response;
 import static com.jammy.mchsclient.MyApplication.activityMap;
 
 public class MainActivity extends FragmentActivity implements BottomNavigationBar.OnTabSelectedListener {
-    @Bind(R.id.viewPager)
+    @BindView(R.id.viewPager)
     public ViewPager viewPager;
 
     BottomNavigationBar mBottomNavigationBar;

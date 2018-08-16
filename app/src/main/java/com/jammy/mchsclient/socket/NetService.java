@@ -10,6 +10,8 @@ import android.util.Log;
 import com.jammy.mchsclient.model.User;
 
 public class NetService {
+
+	public static final String TAG = "NetService";
 	private static NetService instance = null;
 	private Socket clientSocket = null;
 	private NetConnect netConnect = null;
@@ -35,6 +37,7 @@ public class NetService {
 		netConnect = new NetConnect();
 		netConnect.startConnect();
 		if(netConnect.isConnected()){
+			Log.i(TAG, "setConnection: success");
 			this.isConnected = true;
 			clientSocket = netConnect.getInstance();
 			startListen(clientSocket,handle);
@@ -51,14 +54,17 @@ public class NetService {
 		clientListenThread.start();
 	}
 	public void send(Object obj){
+		Log.i("NetService", "send");
 		clientSendThread.send(obj);
 	}
 	public void closeConnection(){
 		if(clientListenThread!=null){
+			Log.i("NetService", "clientListenThread close");
 			clientListenThread.close();
 		}
 		if(clientSocket!=null){
 			try {
+				Log.i("NetService", "clientSocket close");
 				clientSocket.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

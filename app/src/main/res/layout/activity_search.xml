@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_search"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#000"
+        app:layout_scrollFlags="scroll|enterAlways"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        <ImageView
+            android:id="@+id/iv_search_back"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/search_return"
+            android:clickable="true"/>
+        <LinearLayout
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:orientation="horizontal"
+            android:background="@drawable/btn_reg"
+            android:layout_marginLeft="30dp">
+
+            <SearchView
+                android:id="@+id/sv_contacts_search"
+                android:hint="Search"
+                android:textSize="15sp"
+                android:background="@null"
+                android:singleLine="true"
+                android:textAlignment="center"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+
+    </android.support.v7.widget.Toolbar>
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"></TableRow>
+
+    <ListView
+        android:id="@+id/lv_search_contacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#969696"/>
+
+</LinearLayout>

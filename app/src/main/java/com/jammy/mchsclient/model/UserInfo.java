@@ -1,8 +1,9 @@
 package com.jammy.mchsclient.model;
 
-public class UserInfo {
+import java.io.Serializable;
+
+public class UserInfo implements Serializable{
     private int id;
-    private int type;
     private String username;
     private String password;
     private String nickname;
@@ -13,29 +14,6 @@ public class UserInfo {
     private String birth;
     private int gender;
     private String info;
-
-    public UserInfo(int id, int type, String username, String password, String nickname, String phone, String email, String head, String location, String birth, int gender, String info) {
-        this.id = id;
-        this.type = type;
-        this.username = username;
-        this.password = password;
-        this.nickname = nickname;
-        this.phone = phone;
-        this.email = email;
-        this.head = head;
-        this.location = location;
-        this.birth = birth;
-        this.gender = gender;
-        this.info = info;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
 
     public int getId() {
         return id;

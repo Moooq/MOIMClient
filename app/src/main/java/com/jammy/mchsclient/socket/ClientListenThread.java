@@ -11,12 +11,13 @@ import android.util.Log;
 
 import com.jammy.mchsclient.activity.ChatActivity;
 import com.jammy.mchsclient.fragment.ChatFragment;
+import com.jammy.mchsclient.fragment.ContactsFragment;
 import com.jammy.mchsclient.model.Msg;
 
-import static android.content.ContentValues.TAG;
 import static com.jammy.mchsclient.MyApplication.activityMap;
 
 public class ClientListenThread extends Thread {
+    public static final String TAG = "ClientListenThread";
     private Socket socket = null;
     private boolean isStart = true;
     private ObjectInputStream ois = null;
@@ -45,7 +46,7 @@ public class ClientListenThread extends Thread {
                 if (obj instanceof Msg) {
                     Msg message = (Msg) obj;
                     Log.i(TAG, "getMessage:"+message.getMessagecontent());
-                    if (message.getMessagetype() == 1) {
+                    if (message.getMessagetype() == Msg.STRING) {
                         Message mesg = new Message();
                         mesg.what = 0;
                         mesg.obj = message;
@@ -57,6 +58,12 @@ public class ClientListenThread extends Thread {
                         mesg2.obj = message;
                         ChatFragment.handler.sendMessage(mesg2);
 
+                    }
+                    if(message.getMessagetype() == Msg.APPLY){
+                        Message mesg = new Message();
+                        mesg.what = 0;
+                        mesg.obj = message;
+                        ContactsFragment.handler.sendMessage(mesg);
                     }
                 }
 

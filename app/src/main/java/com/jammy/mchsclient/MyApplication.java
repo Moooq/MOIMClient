@@ -18,9 +18,10 @@ import java.util.logging.Level;
  */
 
 public class MyApplication extends Application {
-    public static UserInfo userOnLine = null;
+    public static UserInfo userOnLine = new UserInfo();
     public static Map<String,Friend> friends= new HashMap<String,Friend>();
     public static Map<String,Activity> activityMap = new HashMap<String,Activity>();
+//    public static Map<String,Integer> newmsg = new HashMap<String, Integer>();
     @Override
     public void onCreate() {
         super.onCreate();

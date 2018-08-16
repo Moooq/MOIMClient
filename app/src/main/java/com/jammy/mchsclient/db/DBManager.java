@@ -55,7 +55,8 @@ public class DBManager {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         //生成要修改或者插入的键值
         ContentValues cv = new ContentValues();
-        cv.put(DBHelper.FIELD_FRIEND, msg.getFriend());
+        cv.put(DBHelper.FIELD_SENDER, msg.getSender());
+        cv.put(DBHelper.FIELD_RECEIVER,msg.getReceiver());
         cv.put(DBHelper.FIELD_TIME, msg.getTime());
         cv.put(DBHelper.FIELD_MESSAGE_TYPE, msg.getMessagetype());
         cv.put(DBHelper.FIELD_MESSAGE_CONTENT, msg.getMessagecontent().toString());
@@ -76,7 +77,8 @@ public class DBManager {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         for (int i = 0; i < msgs.length; i++) {
             ContentValues cv = new ContentValues();
-            cv.put(DBHelper.FIELD_FRIEND, msgs[i].getFriend());
+            cv.put(DBHelper.FIELD_SENDER, msgs[i].getSender());
+            cv.put(DBHelper.FIELD_RECEIVER,msgs[i].getReceiver());
             cv.put(DBHelper.FIELD_TIME, msgs[i].getTime());
             cv.put(DBHelper.FIELD_MESSAGE_TYPE, msgs[i].getMessagetype());
             cv.put(DBHelper.FIELD_MESSAGE_CONTENT, msgs[i].getMessagecontent().toString());
@@ -95,11 +97,23 @@ public class DBManager {
         DBHelper dbHelper = new DBHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String sql = "delete from "+DBHelper.TABLE_NAME
-                +" where friend='"+msg.getFriend()
+                +" where sender='"+msg.getSender()
+                +"' and receiver='"+msg.getReceiver()
                 +"' and time='"+msg.getTime()
                 +"' and messageType="+msg.getMessagetype()
                 +" and messageContent='"+msg.getMessagecontent()
-                +"' and type="+msg.getType();
+                +"' and type="+msg.getType() ;
+        db.execSQL(sql);
+        db.close();
+    }
+
+    /**
+     * 清空数据库
+     */
+    public void deleteDatas(Context context){
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "delete from "+DBHelper.TABLE_NAME;
         db.execSQL(sql);
         db.close();
     }
@@ -108,12 +122,14 @@ public class DBManager {
      * 建表
      */
     public void createTable(Context context){
+//        deleteDatas(context);
         DBHelper dbHelper = new DBHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String sql = "CREATE TABLE IF NOT EXISTS " + MyApplication.userOnLine.getUsername() + "(id integer primary key autoincrement ,friend varchar(20),time varchar(50),messageType integer(10),messageContent varchar(400),type int(10));";
+        String sql = "CREATE TABLE IF NOT EXISTS " + MyApplication.userOnLine.getUsername() + "(id integer primary key autoincrement ,sender varchar(20),receiver varchar(20),time varchar(50),messageType integer(10),messageContent varchar(400),type int(10));";
         db.execSQL(sql);
         db.close();
     }
+
 
     /**
      * 查询全部数据
@@ -124,21 +140,22 @@ public class DBManager {
         List<Msg> msgList=new ArrayList<Msg>();
         int i =0;
         //指定要查询的是哪几列数据
-        String[] columns = {DBHelper.FIELD_FRIEND,DBHelper.FIELD_TIME,DBHelper.FIELD_MESSAGE_TYPE,DBHelper.FIELD_MESSAGE_CONTENT,DBHelper.FIELD_TYPE};
+        String[] columns = {DBHelper.FIELD_SENDER,DBHelper.FIELD_RECEIVER,DBHelper.FIELD_TIME,DBHelper.FIELD_MESSAGE_TYPE,DBHelper.FIELD_MESSAGE_CONTENT,DBHelper.FIELD_TYPE};
         //获取可读数据库
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         //查询数据库
         Cursor cursor = null;
         try {
-            cursor = db.query(DBHelper.TABLE_NAME, columns, null, null, null, null, "friend");//获取数据游标
+            Log.i(TAG, "table_name:"+DBHelper.TABLE_NAME);
+            cursor = db.query(DBHelper.TABLE_NAME, columns, null, null, null, null, "sender");//获取数据游标
             while (cursor.moveToNext()) {
                 Msg msg1 = new Msg();
-                msg1.setFriend(cursor.getString(0));
-                Log.i("123", "friend"+cursor.getString(0));
-                msg1.setTime(cursor.getString(1));
-                msg1.setMessagetype(Integer.parseInt(cursor.getString(2)));
-                msg1.setMessagecontent(cursor.getString(3));
-                msg1.setType(Integer.parseInt(cursor.getString(4)));
+                msg1.setSender(cursor.getString(0));
+                msg1.setReceiver(cursor.getString(1));
+                msg1.setTime(cursor.getString(2));
+                msg1.setMessagetype(Integer.parseInt(cursor.getString(3)));
+                msg1.setMessagecontent(cursor.getString(4));
+                msg1.setType(Integer.parseInt(cursor.getString(5)));
                 msgList.add(msg1);
             }
             //关闭游标防止内存泄漏
@@ -162,21 +179,21 @@ public class DBManager {
         List<Msg> msgList=new ArrayList<Msg>();
         int i =0;
         //指定要查询的是哪几列数据
-        String[] columns = {DBHelper.FIELD_FRIEND,DBHelper.FIELD_TIME,DBHelper.FIELD_MESSAGE_TYPE,DBHelper.FIELD_MESSAGE_CONTENT,DBHelper.FIELD_TYPE};
+        String[] columns = {DBHelper.FIELD_SENDER,DBHelper.FIELD_RECEIVER,DBHelper.FIELD_TIME,DBHelper.FIELD_MESSAGE_TYPE,DBHelper.FIELD_MESSAGE_CONTENT,DBHelper.FIELD_TYPE};
         //获取可读数据库
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         //查询数据库
         Cursor cursor = null;
         try {
-            cursor = db.query(DBHelper.TABLE_NAME, columns, "friend=?", new String[]{friendname}, null, null, "friend");//获取数据游标
+            cursor = db.query(DBHelper.TABLE_NAME, columns, "sender=?", new String[]{friendname}, null, null, null);//获取数据游标
             while (cursor.moveToNext()) {
                 Msg msg1 = new Msg();
-                msg1.setFriend(cursor.getString(0));
-                Log.i("123", "friend"+cursor.getString(0));
-                msg1.setTime(cursor.getString(1));
-                msg1.setMessagetype(Integer.parseInt(cursor.getString(2)));
-                msg1.setMessagecontent(cursor.getString(3));
-                msg1.setType(Integer.parseInt(cursor.getString(4)));
+                msg1.setSender(cursor.getString(0));
+                msg1.setReceiver(cursor.getString(1));
+                msg1.setTime(cursor.getString(2));
+                msg1.setMessagetype(Integer.parseInt(cursor.getString(3)));
+                msg1.setMessagecontent(cursor.getString(4));
+                msg1.setType(Integer.parseInt(cursor.getString(5)));
                 msgList.add(msg1);
             }
             //关闭游标防止内存泄漏
@@ -184,7 +201,27 @@ public class DBManager {
                 cursor.close();
             }
         } catch (SQLException e) {
-            Log.e(TAG, "queryDatas" + e.toString());
+            Log.e(TAG, "queryData" + e.toString());
+        }
+        Cursor cursor2 = null;
+        try {
+            cursor2 = db.query(DBHelper.TABLE_NAME, columns, "receiver=?", new String[]{friendname}, null, null, null);//获取数据游标
+            while (cursor2.moveToNext()) {
+                Msg msg1 = new Msg();
+                msg1.setSender(cursor2.getString(0));
+                msg1.setReceiver(cursor2.getString(1));
+                msg1.setTime(cursor2.getString(2));
+                msg1.setMessagetype(Integer.parseInt(cursor2.getString(3)));
+                msg1.setMessagecontent(cursor2.getString(4));
+                msg1.setType(Integer.parseInt(cursor2.getString(5)));
+                msgList.add(msg1);
+            }
+            //关闭游标防止内存泄漏
+            if (cursor != null) {
+                cursor.close();
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "queryData" + e.toString());
         }
         //关闭数据库
         db.close();

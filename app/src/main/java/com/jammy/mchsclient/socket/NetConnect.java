@@ -34,7 +34,7 @@ public class NetConnect {
 		}
 	}
 	public Socket getInstance(){
-		System.out.println("getInstance");
+		Log.i("NetConnect", "getInstance");
 		return this.clientSocket;
 	}
 	public boolean isConnected(){

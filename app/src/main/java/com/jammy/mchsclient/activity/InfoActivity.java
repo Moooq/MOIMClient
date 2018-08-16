@@ -27,9 +27,11 @@ import com.google.gson.Gson;
 import com.jammy.mchsclient.R;
 import com.jammy.mchsclient.model.Friend;
 import com.jammy.mchsclient.model.ReturnSuccess;
+import com.jammy.mchsclient.model.UserInfo;
 import com.jammy.mchsclient.url.API;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -48,6 +50,7 @@ public class InfoActivity extends AppCompatActivity {
 
     public static Handler handler = null;
     Friend friend = new Friend();
+    UserInfo friendinfo = new UserInfo();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,21 +76,27 @@ public class InfoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         ArrayList<String> list = (ArrayList) intent.getSerializableExtra("friend");
         friend.setUsername(list.get(0));
-        friend.setEmail(list.get(1));
-        friend.setPhone(list.get(2));
-        friend.setHead(list.get(3));
-        friend.setNickname(list.get(4));
-        friend.setGender(Integer.parseInt(list.get(5)));
+        friendinfo.setEmail(list.get(1));
+        friendinfo.setPhone(list.get(2));
+        friendinfo.setHead(list.get(3));
+        friendinfo.setNickname(list.get(4));
+        friendinfo.setGender(Integer.parseInt(list.get(5)));
         friend.setRemark(list.get(6));
-        if (friend.getGender() == 1) {
+        friend.setFriendinfo(friendinfo);
+        if (friendinfo.getGender() == 1) {
             ivFriendGender.setImageResource(R.drawable.male);
         } else {
             ivFriendGender.setImageResource(R.drawable.female);
         }
-        tvFriendNick.setText(friend.getNickname());
+        Picasso.with(getBaseContext())
+                .load(API.HEAD_PATH+friend.getUsername()+"_Head.png")
+                .fit()
+                .error(R.drawable.head)
+                .into(ivFriendHead);
+        tvFriendNick.setText(friendinfo.getNickname());
         tvFriendID.setText(friend.getUsername());
         if (friend.getRemark().equals(" ")) {
-            tvFriendName.setText(friend.getNickname());
+            tvFriendName.setText(friendinfo.getNickname());
         } else {
             tvFriendName.setText(friend.getRemark());
         }

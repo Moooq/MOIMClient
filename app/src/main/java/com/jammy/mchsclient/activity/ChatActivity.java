@@ -40,9 +40,14 @@ import com.jammy.mchsclient.fragment.ChatFragment;
 import com.jammy.mchsclient.model.Msg;
 import com.jammy.mchsclient.socket.NetService;
 import com.jammy.mchsclient.url.API;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +58,7 @@ import static com.jammy.mchsclient.MyApplication.userOnLine;
 
 public class ChatActivity extends AppCompatActivity {
 
+    public static final String TAG = "ChatActivity";
     String friendName = null;
     DBManager dbManager = new DBManager();
     List<Msg> chatLog = new ArrayList<Msg>();
@@ -82,7 +88,7 @@ public class ChatActivity extends AppCompatActivity {
             if (!friends.get(friendName).getRemark().equals(" ")) {
                 actionBar.setTitle(friends.get(friendName).getRemark());
             } else {
-                actionBar.setTitle(friends.get(friendName).getNickname());
+                actionBar.setTitle(friends.get(friendName).getFriendinfo().getNickname());
             }
         }
 
@@ -99,17 +105,14 @@ public class ChatActivity extends AppCompatActivity {
                 x = -1;
                 Log.i("sendMessage", "onClick:send");
                 Msg sendMsg = new Msg();
-                sendMsg.setType(-1);
-                Log.i("sendMessage", "" + sendMsg.getType());
-                sendMsg.setFriend(friendName);
-                Log.i("sendMessage", "" + sendMsg.getFriend());
+                sendMsg.setReceiver(friends.get(friendName).getUsername());
                 sendMsg.setMessagetype(1);
+                sendMsg.setType(0);
                 sendMsg.setMessagecontent(etSendText.getText().toString());
                 Log.i("sendMessage", "" + sendMsg.getMessagecontent());
-                sendMsg.setUsername(userOnLine.getUsername());
+                sendMsg.setSender(userOnLine.getUsername());
                 sendMsg.setTime(getCurrentTime());
                 Log.i("sendMessage", "onClick:send2");
-                Log.i("sendMessage", "1:" + sendm.getType());
                 sendMessage(sendMsg);
                 etSendText.setText("");
                 etSendText.clearFocus();
@@ -124,6 +127,8 @@ public class ChatActivity extends AppCompatActivity {
     void init() {
         setTitle(friendName);
         chatLog = dbManager.queryFriendMessageDatas(getBaseContext(), friendName);
+        chatLog = sortStringMethod(chatLog);
+        Log.i("chatlogsize", ""+chatLog.size());
         if (chatLog.size() > 0) {
             chatLogBaseAdapter = new ChatLogBaseAdapter(chatLog);
             lvChatlog.setAdapter(chatLogBaseAdapter);
@@ -134,10 +139,10 @@ public class ChatActivity extends AppCompatActivity {
                 super.handleMessage(msg);
                 switch (msg.what) {
                     case 0:
-                        if(chatLog.size()==1){
+//                        if(chatLog.size()==1){
                             chatLogBaseAdapter = new ChatLogBaseAdapter(chatLog);
                             lvChatlog.setAdapter(chatLogBaseAdapter);
-                        }
+//                        }
                         chatLog.add((Msg) msg.obj);
                         Log.i("sendMessage", "123");
                         chatLogBaseAdapter.notifyDataSetChanged();
@@ -149,6 +154,7 @@ public class ChatActivity extends AppCompatActivity {
                     case 2:
                         ActionBar actionBar1 = getSupportActionBar();
                         actionBar1.setTitle(friends.get(friendName).getRemark());
+                        break;
                 }
             }
         };
@@ -164,6 +170,19 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    //msg按时间排序
+    public  List<Msg> sortStringMethod(List<Msg> list){
+        Collections.sort(list, new Comparator(){
+            @Override
+            public int compare(Object o1, Object o2) {
+                Msg m1=(Msg) o1;
+                Msg m2=(Msg) o2;
+                return m1.getTime().compareTo(m2.getTime());
+            }
+        });
+        return list;
+    }
+
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -177,6 +196,7 @@ public class ChatActivity extends AppCompatActivity {
             case 1:
                 dbManager.deleteData(chatLog.get(info.position),getBaseContext());
                 chatLog.remove(info.position);
+                Log.i(TAG, "chatlog.size_after deleted:"+chatLog.size());
                 chatLogBaseAdapter.notifyDataSetChanged();
                 return true;
             default:
@@ -187,7 +207,7 @@ public class ChatActivity extends AppCompatActivity {
         //sendm = new Msg();
         Log.i("sendMessage", "sendMessage: ");
         sendm = m;
-        Log.i("sendMessage", "2:" + sendm.getType());
+//        Log.i("sendMessage", "2:" + sendm.getType());
         new SendMessage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -203,7 +223,7 @@ public class ChatActivity extends AppCompatActivity {
 
         private ChatLogBaseAdapter(List<Msg> list) {
             this.data = list;
-            Log.i("sendMessage", "56：" + list.size() + ":" + data.get(data.size() - 1).getType() + ":" + chatLog.get(chatLog.size() - 1).getType());
+//            Log.i("sendMessage", "56：" + list.size() + ":" + data.get(data.size() - 1).getType() + ":" + chatLog.get(chatLog.size() - 1).getType());
         }
 
         @Override
@@ -237,11 +257,26 @@ public class ChatActivity extends AppCompatActivity {
             final ImageView ivLeftHead = (ImageView) view.findViewById(R.id.receive_head);
             final ImageView ivRightHead = (ImageView) view.findViewById(R.id.send_head);
             final ImageView ivRightFail = (ImageView) view.findViewById(R.id.send_fail);
-            Log.i("sendMessage", "5：" + position + ":" + data.get(position).getType() + ":" + chatLog.get(position).getType() + ":" + x);
+//            Log.i("sendMessage", "5：" + position + ":" + data.get(position).getType() + ":" + chatLog.get(position).getType() + ":" + x);
+            Log.i("ChatLogBaseAdapter", "datasize:"+data.size());
+            Log.i("ChatLogBaseAdapter", "position:"+position);
+            Picasso.with(getBaseContext())
+                    .load(API.HEAD_PATH+userOnLine.getUsername()+"_Head.png")
+                    .fit()
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    .error(R.drawable.head)
+                    .into(ivRightHead);
+            Picasso.with(getBaseContext())
+                    .load(API.HEAD_PATH+friendName+"_Head.png")
+                    .fit()
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    .error(R.drawable.head)
+                    .into(ivLeftHead);
             if ((position == data.size() - 1) && x == -1) {
                 Msg cm = chatLog.get(position);
                 chatLog.remove(position);
-                cm.setType(-1);
                 chatLog.add(cm);
                 Log.i("sendMessage", "x：" + x + ":" + position);
                 layoutRight.setVisibility(View.VISIBLE);
@@ -254,23 +289,26 @@ public class ChatActivity extends AppCompatActivity {
                 ivRightFail.setVisibility(View.GONE);
                 x = 0;
             } else {
-                if (data.get(position).getType() == 0) {
-                    layoutRight.setVisibility(View.GONE);
-                    layoutLeft.setVisibility(View.VISIBLE);
-                    tvLeftTime.setText(data.get(position).getTime());
-                    if (data.get(position).getMessagetype() == 1) {
-                        tvLeftContent.setText(data.get(position).getMessagecontent() + "");
-                        ivLeftContent.setVisibility(View.GONE);
-                    }
-                } else {
+                if (data.get(position).getSender().equals(userOnLine.getUsername())) {
+                    Log.i("chatlog", "sender");
                     layoutRight.setVisibility(View.VISIBLE);
                     layoutLeft.setVisibility(View.GONE);
                     tvRightTime.setText(data.get(position).getTime());
-                    if (data.get(position).getMessagetype() == 1) {
+                    if (data.get(position).getMessagetype() == Msg.STRING) {
                         tvRightContent.setText(data.get(position).getMessagecontent() + "");
                         ivRightContent.setVisibility(View.GONE);
                     }
                     ivRightFail.setVisibility(View.GONE);
+
+                } else {
+                    Log.i("chatlog", "receiver");
+                    layoutRight.setVisibility(View.GONE);
+                    layoutLeft.setVisibility(View.VISIBLE);
+                    tvLeftTime.setText(data.get(position).getTime());
+                    if (data.get(position).getMessagetype() == Msg.STRING) {
+                        tvLeftContent.setText(data.get(position).getMessagecontent() + "");
+                        ivLeftContent.setVisibility(View.GONE);
+                    }
                 }
             }
             return view;
@@ -289,11 +327,11 @@ public class ChatActivity extends AppCompatActivity {
                 Toast.makeText(this, "...", Toast.LENGTH_SHORT).show();
                 ArrayList<String> finfo = new ArrayList<String>();
                 finfo.add(friends.get(friendName).getUsername());
-                finfo.add(friends.get(friendName).getEmail());
-                finfo.add(friends.get(friendName).getPhone());
-                finfo.add(friends.get(friendName).getHead());
-                finfo.add(friends.get(friendName).getNickname());
-                finfo.add(friends.get(friendName).getGender() + "");
+                finfo.add(friends.get(friendName).getFriendinfo().getEmail());
+                finfo.add(friends.get(friendName).getFriendinfo().getPhone());
+                finfo.add(friends.get(friendName).getFriendinfo().getHead());
+                finfo.add(friends.get(friendName).getFriendinfo().getNickname());
+                finfo.add(friends.get(friendName).getFriendinfo().getGender() + "");
                 finfo.add(friends.get(friendName).getRemark());
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("friend", finfo);
@@ -327,6 +365,7 @@ public class ChatActivity extends AppCompatActivity {
             Log.i("sendMessage", "doinbackground");
             netService = NetService.getInstance();
             if (!netService.isConnected()) {
+
                 return 0;
             }
             Log.i("sendMessage", "setconnection+send");
@@ -348,7 +387,7 @@ public class ChatActivity extends AppCompatActivity {
                 Message mesg2 = new Message();
                 mesg2.what = 0;
                 mesg2.obj = sendm;
-                Log.i("sendMessage", "3:" + sendm.getType());
+//                Log.i("sendMessage", "3:" + sendm.getType());
                 ChatFragment.handler.sendMessage(mesg2);
             }
         }
